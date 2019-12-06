@@ -41,8 +41,12 @@ class JsonClientTwigExtension extends Twig_Extension
             Craft::error('URL parameter not set', __METHOD__);
             return false;
         }
-
-        $data = self::getUrl($parameters['url']);
+        if (!isset($parameters['headers'])) {
+            Craft::error('Headers parameter not set', __METHOD__);
+            return false;
+        }
+        $headers = $parameters['headers'];
+        $data = self::getUrl($parameters['url'],$headers);
         return json_decode($data, true);
     }
 
@@ -56,7 +60,7 @@ class JsonClientTwigExtension extends Twig_Extension
      *
      * @return mixed
      */
-    protected static function getUrl($url)
+    protected static function getUrl($url,$headers)
     {
         Craft::debug('Fetching JSON from: '.$url, __METHOD__);
 
@@ -69,6 +73,7 @@ class JsonClientTwigExtension extends Twig_Extension
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS => 5,
                 CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_HTTPHEADER => $headers,
             ]
         );
         $data = curl_exec($ch);
